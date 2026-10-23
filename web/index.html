@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VELOCITY X — Next-Gen Mobility</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="brand">
+      VELOCITY<span>X</span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html" class="active">Fleet Catalog</a></li>
+      <li id="myRentalsNavItem" style="display:none;">
+        <a href="javascript:void(0)" onclick="openMyRentalsModal()" style="color:var(--accent-cyan); cursor:pointer;">My Rentals</a>
+      </li>
+      <li id="authNavRegister"><a href="register.html">Register</a></li>
+      <li id="authNavLogin"><a href="login.html" class="btn btn-outline">Sign In</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Header -->
+  <header style="text-align: center; padding: 3.5rem 5% 1.5rem; position:relative; z-index:1;">
+    <h1 style="font-size: 2.8rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 0.75rem;">
+      NEXT-GEN <span style="color: var(--accent-cyan); text-shadow: var(--border-glow);">MOBILITY</span> FLEET
+    </h1>
+    <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+      Instant reservations on high-performance electrics, sports bikes, luxury SUVs, and commercial haulers.
+    </p>
+  </header>
+
+  <!-- Filter & Search Controls -->
+  <section class="filter-container" style="position:relative; z-index:1;">
+    <div class="category-tabs">
+      <button class="tab-btn active" data-category="ALL">All Categories</button>
+      <button class="tab-btn" data-category="BIKE">Bikes</button>
+      <button class="tab-btn" data-category="CAR">Cars</button>
+      <button class="tab-btn" data-category="HEAVY_COMMERCIAL">Commercial & Heavy</button>
+    </div>
+    <input type="text" id="fleetSearch" class="search-box" placeholder="Search by model, brand, or specs...">
+  </section>
+
+  <!-- Fleet Cards Grid -->
+  <main class="fleet-grid" id="fleetContainer" style="position:relative; z-index:1;">
+    <!-- Populated dynamically by app.js -->
+  </main>
+
+  <!-- My Rentals & Returns Modal -->
+  <div class="modal-overlay" id="myRentalsModal">
+    <div class="modal-content glass-panel" style="max-width: 850px; max-height: 85vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h3>My Rented Fleet & Active Leases</h3>
+        <button class="close-modal" onclick="closeMyRentalsModal()">&times;</button>
+      </div>
+      <div id="myRentalsContainer">
+        <!-- Rendered by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking & Quote Reservation Modal -->
+  <div class="modal-overlay" id="bookingModal">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h3 id="bookingModalTitle">Reserve Vehicle</h3>
+        <button class="close-modal" onclick="closeBookingModal()">&times;</button>
+      </div>
+      <form id="bookingForm">
+        <input type="hidden" id="bookModelId">
+        <div class="form-group">
+          <label>Select Inventory Unit (Registration Identifier)</label>
+          <select id="bookUnitSelect" class="form-control" required></select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label>Rental Start Date</label>
+            <input type="date" id="bookStartDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Rental End Date</label>
+            <input type="date" id="bookEndDate" class="form-control" required>
+          </div>
+        </div>
+
+        <div id="quoteSummary" style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem; display: none;">
+          <div style="display:flex; justify-content:space-between; margin-bottom: 0.35rem;">
+            <span style="color:var(--text-muted);">Duration:</span>
+            <strong id="quoteDays">0 Days</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom: 0.35rem;">
+            <span style="color:var(--text-muted);">Subtotal:</span>
+            <span id="quoteSubtotal">₹0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom: 0.35rem;">
+            <span style="color:var(--text-muted);">GST (18%):</span>
+            <span id="quoteTax">₹0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top: 0.5rem; border-top: 1px solid var(--border-glass); padding-top: 0.5rem;">
+            <strong>Total Amount:</strong>
+            <strong id="quoteTotal" style="color: var(--accent-cyan); font-size: 1.15rem;">₹0.00</strong>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Confirm & Authorize Payment</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

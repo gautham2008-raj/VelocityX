@@ -1,0 +1,4 @@
+bin/
+*.class
+velocity_x.db*
+.vscode/

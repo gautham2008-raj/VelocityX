@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operations Dashboard — VELOCITY X</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Leaflet CSS & JS for Live GPS Telemetry -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    #liveGpsMap {
+      width: 100%;
+      height: 540px;
+      border-radius: 12px;
+      border: 1px solid var(--border-neon);
+      box-shadow: var(--border-glow);
+      background: #060913;
+    }
+    .leaflet-popup-content-wrapper {
+      background: rgba(15, 23, 42, 0.95) !important;
+      color: #f8fafc !important;
+      border: 1px solid var(--accent-cyan);
+      backdrop-filter: blur(8px);
+    }
+    .leaflet-popup-tip {
+      background: rgba(15, 23, 42, 0.95) !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <nav class="navbar">
+    <div class="brand">
+      VELOCITY<span>X</span> <span style="font-size: 0.75rem; color: var(--accent-magenta); font-weight: normal; border: 1px solid var(--accent-magenta); padding: 2px 6px; border-radius: 4px;">OPERATIONS CENTER</span>
+    </div>
+    <div style="display:flex; align-items:center; gap: 1rem;">
+      <span id="adminName" style="color: var(--text-muted); font-size: 0.9rem;">Commander</span>
+      <button onclick="AuthEngine.logout()" class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Terminate Session</button>
+    </div>
+  </nav>
+
+  <div class="admin-layout">
+    <!-- Left Workspace Navigation -->
+    <aside class="admin-sidebar">
+      <a href="#overview" class="sidebar-btn active" onclick="switchTab('overview')">Telemetry Overview</a>
+      <a href="#livemap" class="sidebar-btn" onclick="switchTab('livemap')">Live Fleet GPS Map</a>
+      <a href="#bookings" class="sidebar-btn" onclick="switchTab('bookings')">Live Bookings & Returns</a>
+      <a href="#inventory" class="sidebar-btn" onclick="switchTab('inventory')">Provision Fleet Units</a>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="admin-workspace">
+      
+      <!-- TAB 1: OVERVIEW & TELEMETRY -->
+      <section id="tab-overview">
+        <h2 style="margin-bottom: 1.5rem;">System Telemetry & Financials</h2>
+        
+        <div class="metrics-row">
+          <div class="glass-panel metric-card">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Total Inventory</span>
+            <div class="metric-val" id="metricTotalUnits">--</div>
+          </div>
+          <div class="glass-panel metric-card">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Available for Rent</span>
+            <div class="metric-val" style="color: var(--status-available);" id="metricAvailable">--</div>
+          </div>
+          <div class="glass-panel metric-card">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Currently Rented</span>
+            <div class="metric-val" style="color: var(--status-rented);" id="metricRented">--</div>
+          </div>
+          <div class="glass-panel metric-card">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Active Users</span>
+            <div class="metric-val" id="metricUsers">--</div>
+          </div>
+          <div class="glass-panel metric-card">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Gross Revenue (INR)</span>
+            <div class="metric-val" style="color: var(--accent-magenta);" id="metricRevenue">₹0</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: LIVE FLEET GPS TRACKING MAP -->
+      <section id="tab-livemap" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.25rem;">
+          <div>
+            <h2>Real-Time In-Transit Fleet GPS Telemetry</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Live satellite positioning and speed tracking of vehicles currently on road.</p>
+          </div>
+          <span class="badge" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); padding: 0.5rem 1rem;">
+            ● RADAR ONLINE (4s Pulses)
+          </span>
+        </div>
+
+        <div id="liveGpsMap"></div>
+
+        <div class="glass-panel" style="margin-top: 1.5rem; padding: 1.25rem;">
+          <h4 style="margin-bottom: 0.75rem;">Active Vehicle Transponders</h4>
+          <div id="transponderList" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem;">
+            <!-- Rendered dynamically by admin.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: BOOKING LIFECYCLE & RETURN -->
+      <section id="tab-bookings" style="display:none;">
+        <h2 style="margin-bottom: 1.5rem;">Fleet Bookings & Vehicle Returns</h2>
+        <div class="glass-panel" style="padding: 1.5rem;">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Vehicle</th>
+                  <th>Reg Number</th>
+                  <th>Rental Window</th>
+                  <th>Total (₹)</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminBookingsTbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: PROVISIONING -->
+      <section id="tab-inventory" style="display:none;">
+        <h2 style="margin-bottom: 1.5rem;">Inventory Unit Commissioning</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+          <div class="glass-panel" style="padding: 1.5rem;">
+            <h3 style="margin-bottom: 1rem;">Commission Single Unit</h3>
+            <form id="singleUnitForm">
+              <div class="form-group">
+                <label>Target Model</label>
+                <select id="singleModelSelect" class="form-control" required></select>
+              </div>
+              <div class="form-group">
+                <label>Registration Number</label>
+                <input type="text" id="singleRegNum" class="form-control" required placeholder="TS-09-VX-9999">
+              </div>
+              <div class="form-group">
+                <label>Custom Daily Rate (₹)</label>
+                <input type="number" id="singleRate" class="form-control" required placeholder="1499">
+              </div>
+              <div class="form-group">
+                <label>Odometer Reading (KM)</label>
+                <input type="number" id="singleOdo" class="form-control" value="0">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Commission Unit</button>
+            </form>
+          </div>
+
+          <div class="glass-panel" style="padding: 1.5rem;">
+            <h3 style="margin-bottom: 1rem;">Batch Provisioning</h3>
+            <form id="bulkUnitForm">
+              <div class="form-group">
+                <label>Target Model</label>
+                <select id="bulkModelSelect" class="form-control" required></select>
+              </div>
+              <div class="form-group">
+                <label>Registration Prefix</label>
+                <input type="text" id="bulkPrefix" class="form-control" required placeholder="TS-08-FLEET">
+              </div>
+              <div class="form-group">
+                <label>Batch Quantity (Units)</label>
+                <input type="number" id="bulkCount" class="form-control" required min="1" max="50" value="5">
+              </div>
+              <div class="form-group">
+                <label>Daily Rate (₹)</label>
+                <input type="number" id="bulkRate" class="form-control" required placeholder="2999">
+              </div>
+              <button type="submit" class="btn btn-outline" style="width: 100%;">Generate Batch Units</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
